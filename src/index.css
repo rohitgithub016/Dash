@@ -1,0 +1,76 @@
+/* Define @font-face for Scandia-Regular */
+@font-face {
+  font-family: 'Scandia-Regular';
+  src: local('Scandia-Regular'), url(/src/assets/fonts/Scandia-Regular.ttf);
+}
+
+/* Define @font-face for Scandia-Medium */
+@font-face {
+  font-family: 'Scandia-Medium';
+  src: local('Scandia-Medium'), url(/src/assets/fonts/Scandia-Medium.ttf);
+}
+
+/* Apply the Scandia font-family to elements with the .Scandia class */
+.Scandia {
+  font-family: 'Scandia-Regular', sans-serif;
+  /* Default to regular */
+}
+
+* {
+  box-sizing: border-box;
+
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  background-color: #F4F7FE;
+}
+
+#root {
+  margin: 0
+}
+
+.ant-layout {
+  background-color: #F4F7FE;
+}
+
+.ant-layout {
+  background-color: #F4F7FE;
+}
+
+.ant-typography {
+  margin: 0;
+  line-height: normal !important;
+  font-style: normal;
+}
+
+.text-description {
+  font-family: "Scandia-Regular";
+  font-weight: 400;
+  color: '#181827'
+}
+
+.groups-logo {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 16px;
+  color: #fff;
+  font-size: 14.4px;
+  font-weight: 700;
+  font-family: "Scandia-Regular";
+}
+
+.tooltip-span div {
+  vertical-align: middle;
+}
+
+.ant-card-meta-title {
+  font-weight: 400 !important;
+  color: #232D42 !important;
+
+}

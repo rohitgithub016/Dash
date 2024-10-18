@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hubz-admin-dashboard-frontend
+  namespace: dev
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 5173
+  selector:
+    app: hubz-admin-dashboard-frontend
+

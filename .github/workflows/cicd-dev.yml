@@ -1,0 +1,100 @@
+name: CI/CD for Develop
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    environment: develop
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          region: ${{ secrets.AWS_REGION }}
+          mask-password: true
+
+      - name: Extract commit hash, date, and time
+        id: vars
+        run: |
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+          DATE_TIME=$(date +'%Y%m%d')
+          echo "COMMIT_HASH=$COMMIT_HASH" >> $GITHUB_ENV
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "DATE_TIME=$DATE_TIME" >> $GITHUB_ENV
+
+      - name: Build Docker image
+        run: |
+          IMAGE_TAG=hubz_admin_dashboard_frontend-${{ env.BRANCH_NAME }}-${{ env.COMMIT_HASH }}-${{ env.DATE_TIME }}
+          docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/hubz_infra_dev:$IMAGE_TAG .
+
+      - name: Push to ECR
+        run: |
+          IMAGE_TAG=hubz_admin_dashboard_frontend-${{ env.BRANCH_NAME }}-${{ env.COMMIT_HASH }}-${{ env.DATE_TIME }}
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/hubz_infra_dev:$IMAGE_TAG
+
+  deploy-to-eks:
+    runs-on: ubuntu-latest
+    needs: build-and-push  
+    environment: develop
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          version: 'v1.30.0'
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Create ConfigMap from GitHub Secrets
+        run: |
+          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name hubz-cluster-eks-cluster
+          kubectl create configmap hubz-admin-dashboard-frontend \
+            --namespace=dev --validate=false --dry-run=client -o yaml > cluster/infra/configmap.yaml
+          kubectl apply -f cluster/infra/configmap.yaml
+          
+      - name: Extract commit hash, date, and time
+        id: vars
+        run: |
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+          DATE_TIME=$(date +'%Y%m%d')
+          echo "COMMIT_HASH=$COMMIT_HASH" >> $GITHUB_ENV
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "DATE_TIME=$DATE_TIME" >> $GITHUB_ENV
+
+      - name: Update tag & Apply the updated deploy.yaml to EKS cluster
+        run: |
+          IMAGE_TAG=hubz_admin_dashboard_frontend-${{ env.BRANCH_NAME }}-${{ env.COMMIT_HASH }}-${{ env.DATE_TIME }}
+          sed -i "s|image:.*|image: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/hubz_infra_dev:$IMAGE_TAG|g" cluster/infra/deploy.yaml
+          cat cluster/infra/deploy.yaml
+          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name hubz-cluster-eks-cluster
+          kubectl apply -f cluster/infra/deploy.yaml -n dev
+          kubectl apply -f cluster/infra/svc.yaml -n dev
+          kubectl apply -f cluster/infra/hpa.yaml -n dev

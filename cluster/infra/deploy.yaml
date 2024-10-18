@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hubz-admin-dashboard-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hubz-admin-dashboard-frontend
+  template:
+    metadata:
+      labels:
+        app: hubz-admin-dashboard-frontend
+    spec:
+      #priorityClassName: high-priority
+      containers:
+        - name: hubz-admin-dashboard-frontend
+          image: 074483586857.dkr.ecr.ap-southeast-1.amazonaws.com/hubz_admin_dashboard_frontend_dev:latest
+          ports:
+            - containerPort: 5173
+          resources:
+            requests:
+              memory: "1000Mi"  
+              cpu: "500m"       # Request 250 millicores (0.25 cores)
+            limits:
+              memory: "1500Mi"
+              cpu: "800m"
+

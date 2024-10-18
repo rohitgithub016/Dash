@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hubz-admin-dashboard-frontend
+  namespace: dev
+data:
+  VITE_API_URL: "https://dashboard-api-dev.hubz.io"
+  VITE_BOT_NAME: "devHubz_bot"
+  VITE_AUTH_URL: "https://dashboard-app-dev.hubz.io/"
+  VITE_HUBZ_BOT_URL: "https://t.me/hubz_dev_v2_bot"

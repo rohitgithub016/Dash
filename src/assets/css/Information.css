@@ -1,0 +1,40 @@
+.information-icon {
+    fill: #5E87BB !important; /* Initial color */
+    transition: fill 0.3s ease; /* Smooth transition */
+  }
+  
+  .information-icon:hover {
+    fill: #007BFE !important; /* Color on hover */
+  }
+  .circle {
+    display: inline-block;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(to bottom, #A0DE7E, #54CB68);
+    /* Green gradient background */
+    color: #fff;
+    /* White text color */
+    text-align: center;
+    line-height: 45px;
+    /* Vertically center the text */
+    margin-right: 8px;
+    /* Adjust spacing between circle and text */
+  }
+  
+  .circle2 {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(to bottom, #A0DE7E, #54CB68);
+    /* Green gradient background */
+    color: #fff;
+    /* White text color */
+    text-align: center;
+    line-height: 30px;
+    /* Vertically center the text */
+    margin-right: 8px;
+    /* Adjust spacing between circle and text */
+  }
+ 
